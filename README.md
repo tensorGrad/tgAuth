@@ -7,6 +7,7 @@ Small OAuth client SDK for integrating tensorGrad SSO into first-party apps.
 - creates `state` values
 - creates PKCE verifier/challenge pairs
 - builds tensorGrad `/oauth/authorize` URLs
+- supports `prompt=login` for account switching
 - exchanges authorization codes at `/oauth/token`
 - fetches canonical identity from `/oauth/userinfo`
 - normalizes tensorGrad user payloads
@@ -100,8 +101,20 @@ export default {
     }
 
     if (url.pathname === "/auth/callback") {
+      const oauthError = url.searchParams.get("error");
+      const oauthErrorDescription = url.searchParams.get("error_description");
       const code = url.searchParams.get("code");
       const state = url.searchParams.get("state");
+
+      if (oauthError) {
+        return Response.json(
+          {
+            error: oauthError,
+            errorDescription: oauthErrorDescription ?? null
+          },
+          { status: 400 }
+        );
+      }
 
       if (!code || !state) {
         return new Response("Missing code or state", { status: 400 });
@@ -113,6 +126,7 @@ export default {
       const expectedState = "<persisted-state>";
       const codeVerifier = "<persisted-code-verifier>";
 
+      // Use a constant-time comparison in your app when comparing secrets.
       if (state !== expectedState) {
         return new Response("Invalid state", { status: 400 });
       }
@@ -152,5 +166,8 @@ export default {
 - tensorGrad currently uses `https://www.tensorgrad.com` as the OAuth provider.
 - `DEFAULT_TG_SCOPES` is the recommended scope set for first-party apps.
 - `assertGrantedScopes(token.scope, ["admin"])` is the simplest way to require admin access.
+- pass `prompt: "login"` to `createAuthorizationUrl(...)` when you need tensorGrad to force a fresh account selection.
+- handle `error` / `error_description` on the callback before validating `code`
+- compare persisted `state` values using a constant-time comparison in your app
 - `isAdminScopeGranted(token.scope)` is available when you only need a boolean check.
 - app session and logout handling stay in the consuming app.

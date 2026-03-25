@@ -17,6 +17,7 @@ export interface AuthorizationUrlOptions {
   redirectUri: string;
   scope: string[] | string;
   state: string;
+  prompt?: "login";
   codeChallenge?: string;
   codeChallengeMethod?: "S256" | "plain";
   extraParams?: Record<string, string>;
@@ -170,6 +171,10 @@ export function createAuthorizationUrl(
   url.searchParams.set("response_type", "code");
   url.searchParams.set("scope", scope);
   url.searchParams.set("state", state);
+
+  if (options.prompt) {
+    url.searchParams.set("prompt", options.prompt);
+  }
 
   if (options.codeChallenge) {
     url.searchParams.set(
