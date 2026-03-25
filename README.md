@@ -45,6 +45,7 @@ console.log(TENSORGRAD_ISSUER);
 
 ```ts
 import {
+  DEFAULT_TG_SCOPES,
   TENSORGRAD_ISSUER,
   assertGrantedScopes,
   createAuthorizationUrl,
@@ -84,7 +85,7 @@ export default {
         },
         {
           redirectUri,
-          scope: ["openid", "profile", "email"],
+          scope: DEFAULT_TG_SCOPES,
           state,
           codeChallenge: pkce.codeChallenge,
           codeChallengeMethod: pkce.codeChallengeMethod
@@ -125,7 +126,7 @@ export default {
         codeVerifier
       });
 
-      assertGrantedScopes(token.scope, ["openid", "profile", "email"]);
+      assertGrantedScopes(token.scope, DEFAULT_TG_SCOPES);
 
       const userFromToken = normalizeTgUser(token.user);
       const userFromUserInfo = normalizeTgUser(
@@ -149,6 +150,7 @@ export default {
 
 - `openid` is mandatory and the library enforces that when building authorize URLs.
 - tensorGrad currently uses `https://www.tensorgrad.com` as the OAuth provider.
+- `DEFAULT_TG_SCOPES` is the recommended scope set for first-party apps.
 - `assertGrantedScopes(token.scope, ["admin"])` is the simplest way to require admin access.
 - `isAdminScopeGranted(token.scope)` is available when you only need a boolean check.
 - app session and logout handling stay in the consuming app.

@@ -1,4 +1,5 @@
 export const TENSORGRAD_ISSUER = "https://www.tensorgrad.com";
+export const DEFAULT_TG_SCOPES = ["openid", "profile", "email"] as const;
 
 export interface tgOAuthConfig {
   issuer: string;
